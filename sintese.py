@@ -12,10 +12,10 @@ def fm_synth(f_port, f_mod, env_port, env_mod, duracao, f_amostragem=44100):
     # Síntese FM: y[n] = A[n] * sin(2 * pi * f_port * t + I[n] * sin(2 * pi * f_mod * t))
     modulante = env_mod * np.sin(2 * np.pi * f_mod * t)
     portadora = env_port * np.sin(2 * np.pi * f_port * t + modulante)
-    portadora = portadora / np.max(np.abs(portadora)) * 0.8
+    portadora = portadora / np.max(np.abs(portadora))
     return portadora
 
-def create_adsr_envelope(attack, decay, sustain_level, release, duracao, f_amostragem):
+def adsr_envelope(attack, decay, sustain_level, release, duracao, f_amostragem):
     total_samples = int(duracao * f_amostragem)
     t = np.linspace(0, duracao, total_samples, endpoint=False)
     
@@ -32,12 +32,29 @@ def create_adsr_envelope(attack, decay, sustain_level, release, duracao, f_amost
     
     return envelope
 
+def exponential_decay_envelope(attack, decay_time, duracao, f_amostragem):
+    total_samples = int(duracao * f_amostragem)
+    t = np.linspace(0, duracao, total_samples, endpoint=False)
+    
+    attack_samples = int(attack * f_amostragem)
+    envelope = np.zeros(total_samples)
+    
+    # Ataque linear
+    envelope[:attack_samples] = np.linspace(0, 1, attack_samples)
+    
+    # Decaimento exponencial após o ataque
+    decay_start = attack_samples
+    decay = np.exp(-(t[decay_start:] - t[decay_start]) / decay_time)
+    envelope[decay_start:] = decay
+    
+    return envelope
+
 def fm_sopro(frequencia, duracao, f_amostragem):
     tromp = Trompete(frequencia)
-    env_port = create_adsr_envelope(tromp.portadora['attack'], tromp.portadora['decay'], 
+    env_port = adsr_envelope(tromp.portadora['attack'], tromp.portadora['decay'], 
                                 tromp.portadora['sustain_level'], tromp.portadora['release'], duracao, f_amostragem)
 
-    env_mod = create_adsr_envelope(tromp.modulante['attack'], tromp.modulante['decay'], 
+    env_mod = adsr_envelope(tromp.modulante['attack'], tromp.modulante['decay'], 
                                tromp.modulante['sustain_level'], tromp.modulante['release'], duracao, f_amostragem)
     
     mod_index_max = 5.0 
@@ -46,3 +63,25 @@ def fm_sopro(frequencia, duracao, f_amostragem):
     sopro_fm = fm_synth(tromp.f_port, tromp.f_mod, env_port, env_mod, duracao, f_amostragem)
 
     return sopro_fm
+
+def fm_corda(frequencia, duracao, f_amostragem):
+    corda = Corda(frequencia)
+    mod_index_max = 8.0
+
+    env_port = exponential_decay_envelope(corda.portadora['attack'], corda.portadora['decay'], duracao=duracao, f_amostragem=f_amostragem)
+
+    env_mod = exponential_decay_envelope(corda.modulante['attack'], corda.modulante['decay'], duracao=duracao, f_amostragem=f_amostragem) * mod_index_max
+
+    # env_port = create_adsr_envelope( attack=0.01, decay=0.5, sustain_level=0.0, release=0.1, duracao=duracao, f_amostragem=f_amostragem)
+
+    # env_mod = create_adsr_envelope(attack=0.005, decay=0.1, sustain_level=0.0, release=0.05, duracao=duracao, f_amostragem=f_amostragem)
+
+    # env_port = create_adsr_envelope(guitarra.portadora['attack'], guitarra.portadora['decay'], 
+    #                             guitarra.portadora['sustain_level'], guitarra.portadora['release'], duracao, f_amostragem)
+
+    # env_mod = create_adsr_envelope(guitarra.modulante['attack'], guitarra.modulante['decay'], 
+    #                            guitarra.modulante['sustain_level'], guitarra.modulante['release'], duracao, f_amostragem)
+
+    corda_fm = fm_synth(corda.f_port, corda.f_mod, env_port, env_mod, duracao, f_amostragem)
+    
+    return corda_fm

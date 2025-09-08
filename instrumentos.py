@@ -16,4 +16,17 @@ class Trompete:
         self.f_port = freq_nota
         self.f_mod = freq_nota * 1.0
         
+class Corda:
+    def __init__(self, freq_nota):
+        self.portadora = {
+            'attack': 0.01,
+            'decay': 0.3,
+        }
+        self.modulante = {
+           'attack': 0.005,
+            'decay': 0.1,
+        }
+         
+        self.f_port = freq_nota
+        self.f_mod = freq_nota * 1.0
         
