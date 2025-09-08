@@ -9,7 +9,6 @@ def fm_synth(f_port, f_mod, env_port, env_mod, duracao, f_amostragem=44100):
     if isinstance(env_mod, (int, float)):
         env_mod = np.ones_like(t) * env_mod
     
-    # Síntese FM: y[n] = A[n] * sin(2 * pi * f_port * t + I[n] * sin(2 * pi * f_mod * t))
     modulante = env_mod * np.sin(2 * np.pi * f_mod * t)
     portadora = env_port * np.sin(2 * np.pi * f_port * t + modulante)
     portadora = portadora / np.max(np.abs(portadora))
@@ -39,10 +38,8 @@ def exponential_decay_envelope(attack, decay_time, duracao, f_amostragem):
     attack_samples = int(attack * f_amostragem)
     envelope = np.zeros(total_samples)
     
-    # Ataque linear
     envelope[:attack_samples] = np.linspace(0, 1, attack_samples)
     
-    # Decaimento exponencial após o ataque
     decay_start = attack_samples
     decay = np.exp(-(t[decay_start:] - t[decay_start]) / decay_time)
     envelope[decay_start:] = decay
@@ -72,16 +69,18 @@ def fm_corda(frequencia, duracao, f_amostragem):
 
     env_mod = exponential_decay_envelope(corda.modulante['attack'], corda.modulante['decay'], duracao=duracao, f_amostragem=f_amostragem) * mod_index_max
 
-    # env_port = create_adsr_envelope( attack=0.01, decay=0.5, sustain_level=0.0, release=0.1, duracao=duracao, f_amostragem=f_amostragem)
-
-    # env_mod = create_adsr_envelope(attack=0.005, decay=0.1, sustain_level=0.0, release=0.05, duracao=duracao, f_amostragem=f_amostragem)
-
-    # env_port = create_adsr_envelope(guitarra.portadora['attack'], guitarra.portadora['decay'], 
-    #                             guitarra.portadora['sustain_level'], guitarra.portadora['release'], duracao, f_amostragem)
-
-    # env_mod = create_adsr_envelope(guitarra.modulante['attack'], guitarra.modulante['decay'], 
-    #                            guitarra.modulante['sustain_level'], guitarra.modulante['release'], duracao, f_amostragem)
-
     corda_fm = fm_synth(corda.f_port, corda.f_mod, env_port, env_mod, duracao, f_amostragem)
     
     return corda_fm
+
+def fm_batida(frequencia, duracao, f_amostragem):
+    batida = Caixa(frequencia)
+
+    env_port = exponential_decay_envelope(batida.portadora['attack'], batida.portadora['decay'], duracao=duracao, f_amostragem=f_amostragem)
+
+    env_mod = exponential_decay_envelope(batida.modulante['attack'], batida.modulante['decay'], duracao=duracao, f_amostragem=f_amostragem) * batida.mod_index_max
+
+    batida_fm = fm_synth(batida.f_port, batida.f_mod, env_port, env_mod, duracao, f_amostragem)
+    
+    return batida_fm
+
