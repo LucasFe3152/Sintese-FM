@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sounddevice as sd
 from instrumentos import *
 
 def fm_synth(f_port, f_mod, env_port, env_mod, duracao, f_amostragem=44100):
@@ -33,5 +32,17 @@ def create_adsr_envelope(attack, decay, sustain_level, release, duracao, f_amost
     
     return envelope
 
+def fm_sopro(frequencia, duracao, f_amostragem):
+    tromp = Trompete(frequencia)
+    env_port = create_adsr_envelope(tromp.portadora['attack'], tromp.portadora['decay'], 
+                                tromp.portadora['sustain_level'], tromp.portadora['release'], duracao, f_amostragem)
 
+    env_mod = create_adsr_envelope(tromp.modulante['attack'], tromp.modulante['decay'], 
+                               tromp.modulante['sustain_level'], tromp.modulante['release'], duracao, f_amostragem)
+    
+    mod_index_max = 5.0 
+    env_mod = env_mod * mod_index_max
 
+    sopro_fm = fm_synth(tromp.f_port, tromp.f_mod, env_port, env_mod, duracao, f_amostragem)
+
+    return sopro_fm
