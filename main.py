@@ -21,7 +21,7 @@ ACIDENTES = {
 }
 
 F_AMOSTRAGEM = 44100
-NOME_ARQUIVO = "asa_branca_sopro.txt"
+NOME_ARQUIVO = "beatit.txt"
 
 
 with open(f'musicas/{NOME_ARQUIVO}', "r", encoding="utf-8") as arquivo:
