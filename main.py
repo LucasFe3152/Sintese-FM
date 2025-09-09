@@ -21,8 +21,10 @@ ACIDENTES = {
 }
 
 F_AMOSTRAGEM = 44100
+NOME_ARQUIVO = "asa_branca_sopro.txt"
 
-with open("calcinhapreta.txt", "r", encoding="utf-8") as arquivo:
+
+with open(f'musicas/{NOME_ARQUIVO}', "r", encoding="utf-8") as arquivo:
             conteudo_total = arquivo.read()
 
 # musica = input()
@@ -71,4 +73,4 @@ for som in sons:
     sd.wait()
 
 musica_final = np.concatenate(som_final)
-wavfile.write('sintese_fm.wav', F_AMOSTRAGEM, musica_final.astype(np.float32))
+wavfile.write(f'{NOME_ARQUIVO[:-4]}_sintetizado.wav', F_AMOSTRAGEM, musica_final.astype(np.float32))
