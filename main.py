@@ -69,8 +69,8 @@ for som in sons:
     freq = get_freq(nota, acidente, int(oitava))
     sinal = get_som(freq, duracao, intensidade, instrumento)
     som_final.append(sinal)
-    sd.play(sinal, F_AMOSTRAGEM)
-    sd.wait()
+    # sd.play(sinal, F_AMOSTRAGEM)
+    # sd.wait()
 
 
 def aplicar_efeitos_finais(musica, efeitos=['reverb', 'tubescreamer', 'pantera']):
