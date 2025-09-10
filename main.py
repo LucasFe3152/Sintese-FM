@@ -114,7 +114,7 @@ def aplicar_efeitos_finais(musica, efeitos=['reverb', 'tubescreamer', 'pantera']
             scooped = clean - mid_content * 0.8
 
             drive = 20
-            distorted = np.tanh(scooped * drive) * 0.8
+            distorted = np.tanh(scooped * drive) * 0.99
 
             sos_presence = signal.butter(1, [4000, 6000], btype='band', fs=F_AMOSTRAGEM, output='sos')
             presence = signal.sosfilt(sos_presence, distorted)
