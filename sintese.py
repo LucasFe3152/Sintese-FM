@@ -14,22 +14,41 @@ def fm_synth(f_port, f_mod, env_port, env_mod, duracao, f_amostragem=44100):
     portadora = portadora / np.max(np.abs(portadora))
     return portadora
 
+import numpy as np
+
 def adsr_envelope(attack, decay, sustain_level, release, duracao, f_amostragem):
     total_samples = int(duracao * f_amostragem)
-    t = np.linspace(0, duracao, total_samples, endpoint=False)
     
-    attack_samples = int(attack * total_samples)
-    decay_samples = int(decay * total_samples)
+    attack_samples  = int(attack  * total_samples)
+    decay_samples   = int(decay   * total_samples)
     release_samples = int(release * total_samples)
     sustain_samples = total_samples - attack_samples - decay_samples - release_samples
     
     envelope = np.zeros(total_samples)
-    envelope[:attack_samples] = np.linspace(0, 1, attack_samples)
-    envelope[attack_samples:attack_samples+decay_samples] = np.linspace(1, sustain_level, decay_samples)
-    envelope[attack_samples+decay_samples:attack_samples+decay_samples+sustain_samples] = sustain_level
-    envelope[attack_samples+decay_samples+sustain_samples:] = np.linspace(sustain_level, 0, release_samples)
+
+    # Attack (0 -> 1)
+    if attack_samples > 0:
+        envelope[:attack_samples] = np.linspace(0, 1, attack_samples, endpoint=True)
+
+    # Decay (1 -> sustain_level)
+    if decay_samples > 0:
+        envelope[attack_samples:attack_samples+decay_samples] = np.linspace(
+            1, sustain_level, decay_samples, endpoint=True
+        )
+
+    # Sustain (flat sustain_level)
+    if sustain_samples > 0:
+        envelope[attack_samples+decay_samples:attack_samples+decay_samples+sustain_samples] = sustain_level
+
+    # Release (last value -> 0)
+    if release_samples > 0:
+        start_value = envelope[attack_samples+decay_samples+sustain_samples-1] if sustain_samples > 0 else envelope[attack_samples+decay_samples-1]
+        envelope[attack_samples+decay_samples+sustain_samples:] = np.linspace(
+            start_value, 0, release_samples, endpoint=True
+        )
     
     return envelope
+
 
 def exponential_decay_envelope(attack, decay_time, duracao, f_amostragem):
     total_samples = int(duracao * f_amostragem)
