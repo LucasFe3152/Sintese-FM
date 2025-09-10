@@ -21,7 +21,7 @@ ACIDENTES = {
 }
 
 F_AMOSTRAGEM = 44100
-NOME_ARQUIVO = "asa_branca_sopro.txt"
+NOME_ARQUIVO = "metal.txt"
 
 
 with open(f'musicas/{NOME_ARQUIVO}', "r", encoding="utf-8") as arquivo:
@@ -113,7 +113,7 @@ def aplicar_efeitos_finais(musica, efeitos=['reverb', 'tubescreamer', 'pantera']
             mid_content = signal.sosfilt(sos_mid, clean)
             scooped = clean - mid_content * 0.8
 
-            drive = 6
+            drive = 20
             distorted = np.tanh(scooped * drive) * 0.8
 
             sos_presence = signal.butter(1, [4000, 6000], btype='band', fs=F_AMOSTRAGEM, output='sos')
@@ -126,5 +126,5 @@ def aplicar_efeitos_finais(musica, efeitos=['reverb', 'tubescreamer', 'pantera']
     return resultado
 
 musica_final = np.concatenate(som_final)
-musica_com_efeitos = aplicar_efeitos_finais(musica_final, ['pantera', 'reverb'])
+musica_com_efeitos = aplicar_efeitos_finais(musica_final, ['pantera'])
 wavfile.write(f'{NOME_ARQUIVO[:-4]}_sintetizado.wav', F_AMOSTRAGEM, musica_com_efeitos.astype(np.float32))
