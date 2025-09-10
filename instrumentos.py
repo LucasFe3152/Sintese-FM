@@ -4,13 +4,13 @@ class Trompete:
             'attack': 0.05,
             'decay': 0.1,
             'sustain_level': 0.7,
-            'release': 0.3
+            'release': 0.4
         }
         self.modulante = {
            'attack': 0.03,
             'decay': 0.2,
             'sustain_level': 0.6,
-            'release': 0.2 
+            'release': 0.4
         }
          
         self.f_port = freq_nota
